@@ -1,0 +1,171 @@
+;;; user-interface.el -*- lexical-binding: t -*-
+
+
+
+;;; -- Straight
+
+(setq package-enable-at-startup nil)
+(setq straight-check-for-modifications nil) 
+;(setq straight-check-for-modifications '(check-on-save find-when-checking))
+(setq straight-repository-branch "develop")
+(defvar bootstrap-version 5)
+(let ((bootstrap-file
+       (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory)))
+  (unless (file-exists-p bootstrap-file)
+    (with-current-buffer
+        (url-retrieve-synchronously
+         "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+         'silent 'inhibit-cookies)
+      (goto-char (point-max))
+      (eval-print-last-sexp)))
+  (load bootstrap-file nil 'nomessage))
+
+(straight-use-package
+ '(use-package
+   :host github :repo "jwiegley/use-package"))
+
+
+
+;;; -- User interface
+
+(scroll-bar-mode -1)
+(menu-bar-mode -1)
+(tool-bar-mode -1)
+(show-paren-mode 1)
+(setq inhibit-startup-screen t)
+(setq ring-bell-function 'ignore)
+(fset 'yes-or-no-p 'y-or-n-p)
+(add-hook 'prog-mode-hook 'display-line-numbers-mode)
+(set-frame-parameter (selected-frame) 'alpha 95)
+
+(use-package gruvbox-theme
+  :straight t
+  :config
+  (load-theme 'gruvbox-dark-medium t))
+  
+
+(use-package window
+  :straight nil
+  :no-require t
+  :custom
+  (display-buffer-alist
+   '(
+     ("\\*eshell-quickrun\\*"
+      (display-buffer-reuse-window)
+      (window-height . 0.25)
+      (side . bottom)
+      (slot . -1))
+
+     ("\\*quickrun\\*"
+      (display-buffer-in-side-window)
+      (window-width . 0.25)
+      (side . right)
+      (slot . -1))
+
+     ("\\*e?shell\\*"
+      (display-buffer-in-side-window)
+      (window-height . 0.25)
+      (side . bottom)
+      (slot . -1))  
+
+     ("\\*inferior-lisp\\*"
+      (display-buffer-in-side-window)
+      (window-height . 0.25)
+      (side . bottom)
+      (slot . -1))  
+
+     ("\\*\\(Backtrace\\|Warnings\\|Compile-Log\\|[Hh]elp\\|Messages\\)\\*"
+      (display-buffer-in-side-window)
+      (window-height . 0.25)
+      (side . bottom)
+      (slot . 0))
+     )))
+
+;; (defun shell-background-handler()
+;;   (set (make-local-variable 'face-remapping-alist)
+;;        '((default :background "#1D2026"))))
+ 
+;; (defun eshell-background-handler()
+;;   (set (make-local-variable 'face-remapping-alist)
+;;        '((default :background "#1D2026"))))
+
+;; ;(defun treemacs-background-handler()
+;; ;  (set (make-local-variable 'face-remapping-alist)
+;; ;       '((default :background "#1D2026"))))
+
+;; (add-hook 'shell-mode-hook 'shell-background-handler)
+;; (add-hook 'eshell-mode-hook 'eshell-background-handler)
+;; ;(add-hook 'treemacs-mode-hook 'treemacs-background-handler)
+
+(use-package subr
+  :straight nil
+  :no-require t
+  :init
+  (fset 'yes-or-no-p 'y-or-n-p))
+
+(prefer-coding-system 'utf-8)
+(when (display-graphic-p)
+  (setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING)))
+
+(use-package minibuffer
+  :straight nil
+  :bind (:map minibuffer-inactive-mode-map
+         ("<mouse-1>" . ignore))
+  :custom
+  (completion-styles '(partial-completion basic))
+  (read-buffer-completion-ignore-case t)
+  (read-file-name-completion-ignore-case t)
+  :custom-face
+  (completions-first-difference ((t (:inherit unspecified)))))
+
+
+
+;;; -- Font
+
+
+(set-face-attribute 'default nil
+                    :family "Iosevka"
+                    :weight 'regular
+                    :height 120
+                    :width 'normal)
+(set-face-attribute 'variable-pitch nil
+                    :family "Iosevka")
+(set-face-attribute 'fixed-pitch nil
+                    :family "Iosevka")
+
+
+
+;;; -- Mode-line
+
+(custom-set-variables
+ '(mode-line-format
+   '(
+    "%e"
+     mode-line-front-space
+     mode-line-client
+     mode-line-modified
+     mode-line-remote
+     " [%b] %m"
+     "\t"
+     (vc-mode vc-mode)
+     mode-line-misc-info
+     "\t\t"
+     mode-line-position)))
+
+(use-package emacs
+  :init
+  (defun crm-indicator (args)
+    (cons (concat "[CRM] " (car args)) (cdr args)))
+  (advice-add #'completing-read-multiple :filter-args #'crm-indicator)
+  (setq minibuffer-prompt-properties
+        '(read-only t cursor-intangible t face minibuffer-prompt))
+  (add-hook 'minibuffer-setup-hook #'cursor-intangible-mode)
+  (setq enable-recursive-minibuffers t))
+
+
+
+(provide 'user-interface)
+
+
+
+;;; user-interface.el ends here

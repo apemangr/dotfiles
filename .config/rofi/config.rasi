@@ -1,0 +1,14 @@
+
+configuration {
+	modi: "drun,run,window";
+	location: 2;
+	fixed-num-lines: false;
+	show-icons: true;
+	icon-theme: "Papirus Dark";
+	display-window: "缾";
+	display-run: "";
+	display-drun: "";
+    display-emoji: "";
+}
+
+@theme "./flat.rasi"
